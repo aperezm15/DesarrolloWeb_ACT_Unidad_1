@@ -18,7 +18,7 @@ final class DependencyInjection
             port: 3306,
             database: 'software_web_db',
             username: 'root',
-            password: '123456',
+            password: '12345',
             charset: 'utf8mb4'
         );
     }
