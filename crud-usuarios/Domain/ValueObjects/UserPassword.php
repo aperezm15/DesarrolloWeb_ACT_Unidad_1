@@ -59,6 +59,10 @@ class UserPassword
         return password_verify($plainText, $this->value);
     }
 
+    public static function fromHash(string $hash): self {
+        return new self($hash);
+    }
+
     public function equals(UserPassword $other)
     {
         return $this->value === $other->value();
