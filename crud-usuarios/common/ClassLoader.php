@@ -62,6 +62,8 @@ private static array $classMap = array(
 'View' => 'Infrastructure/Entrypoints/Web/Presentation/View.php',
 'Flash' => 'Infrastructure/Entrypoints/Web/Presentation/Flash.php',
 'DependencyInjection' => 'Common/DependencyInjection.php',
+'SendEmailPort' => 'Application/Ports/Out/SendEmailPort.php',
+'PhpMailAdapter' => 'Infrastructure/Adapters/Email/PhpMailAdapter.php',
 );
 public static function register(): void
 {
