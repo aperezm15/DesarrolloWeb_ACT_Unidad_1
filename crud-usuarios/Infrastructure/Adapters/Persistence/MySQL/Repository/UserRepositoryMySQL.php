@@ -178,8 +178,8 @@ ORDER BY name ASC
 
     public function saveWithToken(UserModel $user, string $token): void
     {
-        $sql = "INSERT INTO users (id, name, email, password, role, status, activation_token) 
-            VALUES (:id, :name, :email, :password, :role, :status, :token)";
+        $sql = "INSERT INTO users (id, name, email, password, role, status, activation_token, created_at, updated_at) 
+                VALUES (:id, :name, :email, :password, :role, :status, :token, NOW(), NOW())";
 
         $stmt = $this->pdo->prepare($sql);
 
