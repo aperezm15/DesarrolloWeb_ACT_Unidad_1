@@ -28,11 +28,22 @@ final class DependencyInjection
         return self::getConnection()->createPdo();
     }
 
-    // --- NUEVO MÉTODO PARA LOGIN ---
+    // --- NUEVO MÉTODO PARA RESET PASSWORD ---
+    public static function getResetPasswordService(): ResetPasswordService
+    {
+        ClassLoader::loadClass('ResetPasswordService');
+        ClassLoader::loadClass('PhpMailAdapter');
+        $repo = self::getUserRepository();
+        return new ResetPasswordService(
+            $repo,        // GetUserByEmailPort
+            $repo,        // SaveUserPort (para el updatePassword)
+            new PhpMailAdapter() // SendEmailPort
+        );
+    }
+
     public static function getLoginUseCase(): LoginUseCase
     {
         ClassLoader::loadClass('LoginService');
-        // El LoginService necesita el repositorio para buscar por email
         return new LoginService(self::getUserRepository());
     }
 
@@ -53,8 +64,7 @@ final class DependencyInjection
         ClassLoader::loadClass('CreateUserService');
         ClassLoader::loadClass('PhpMailAdapter');
         $repo = self::getUserRepository();
-        $mailAdapter = new PhpMailAdapter();
-        return new CreateUserService($repo, $repo, $mailAdapter);
+        return new CreateUserService($repo, $repo, new PhpMailAdapter());
     }
 
     public static function getUpdateUserUseCase(): UpdateUserUseCase
@@ -89,6 +99,13 @@ final class DependencyInjection
         return new UserWebMapper();
     }
 
+    // --- NUEVO MÉTODO PARA LA VISTA ---
+    public static function getView(): View
+    {
+        ClassLoader::loadClass('View');
+        return new View();
+    }
+
     public static function getUserController(): UserController
     {
         ClassLoader::loadClass('UserController');
@@ -98,7 +115,9 @@ final class DependencyInjection
             self::getGetUserByIdUseCase(),
             self::getGetAllUsersUseCase(),
             self::getDeleteUserUseCase(),
-            self::getUserWebMapper()
+            self::getResetPasswordService(),
+            self::getUserWebMapper(),
+            self::getView()                  
         );
     }
 }

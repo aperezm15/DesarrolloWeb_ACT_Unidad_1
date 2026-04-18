@@ -210,4 +210,11 @@ ORDER BY name ASC
     // Retornamos true si se modificó alguna fila, false si el token no existía
     return $stmt->rowCount() > 0;
 }
+
+
+public function updatePassword(UserId $id, string $hashedPassword): void {
+    $stmt = $this->pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+    $stmt->execute([$hashedPassword, $id->value()]);
+}
+
 }

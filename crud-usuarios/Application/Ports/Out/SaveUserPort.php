@@ -6,4 +6,6 @@ interface SaveUserPort
  public function save(UserModel $user): UserModel;
 
  public function saveWithToken(UserModel $user, string $token): void;
+
+ public function updatePassword(UserId $id, string $hashedPassword): void;
 }
