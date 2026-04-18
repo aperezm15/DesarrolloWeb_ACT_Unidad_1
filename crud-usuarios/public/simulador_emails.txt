@@ -6,3 +6,4 @@ PARA: aperezm15@unicartagena.edu.co
 ASUNTO: Activa tu cuenta, Alvaro Perez 
 CONTENIDO: Hola! Por favor activa tu cuenta haciendo clic en el siguiente enlace: http://localhost/crud-usuarios/public/index.php?route=activate&token=bae0bf7ef2b37aed5831c7a968073c8ad9078fcd4eccf23a8cee58fe517287fd 
 ------------------------------
+[REAL-SENT] PARA: aperezm15@unicartagena.edu.co | FECHA: 2026-04-18 03:37:28

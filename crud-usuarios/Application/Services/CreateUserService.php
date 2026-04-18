@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 require_once __DIR__ . '/../Ports/In/CreateUserUseCase.php';
 require_once __DIR__ . '/../Ports/Out/SaveUserPort.php';
 require_once __DIR__ . '/../Ports/Out/GetUserByEmailPort.php';
@@ -8,11 +9,13 @@ require_once __DIR__ . '/Mappers/UserApplicationMapper.php';
 require_once __DIR__ . '/../../Domain/Exceptions/UserAlreadyExistsException.php';
 require_once __DIR__ . '/../../Domain/ValueObjects/UserEmail.php';
 require_once __DIR__ . '/../Ports/Out/SendEmailPort.php';
+
 final class CreateUserService implements CreateUserUseCase
 {
     private SaveUserPort $saveUserPort;
     private GetUserByEmailPort $getUserByEmailPort;
     private SendEmailPort $sendEmailPort;
+
     public function __construct(
         SaveUserPort $saveUserPort,
         GetUserByEmailPort $getUserByEmailPort,
@@ -22,6 +25,7 @@ final class CreateUserService implements CreateUserUseCase
         $this->getUserByEmailPort = $getUserByEmailPort;
         $this->sendEmailPort = $sendEmailPort; 
     }
+
     public function execute(CreateUserCommand $command): UserModel
     {
         $email = new UserEmail($command->getEmail());
@@ -33,21 +37,28 @@ final class CreateUserService implements CreateUserUseCase
 
         $user = UserApplicationMapper::fromCreateCommandToModel($command);
 
-        // 1. Generamos el token
+        // 1. Generamos el token de activación
         $activationToken = bin2hex(random_bytes(32));
 
-        // 2. Guardamos usando el método del TOKEN
+        // 2. Guardamos al usuario y el token en la base de datos
         $this->saveUserPort->saveWithToken($user, $activationToken);
 
-        // 3. Preparamos y enviamos el correo
+        // 3. Preparamos el link de activación
         $activationLink = "http://localhost/DesarrolloWeb_ACT_Unidad_1/crud-usuarios/public/index.php?route=activate&token=" . $activationToken;
+        
+        // 4. Definimos el asunto
         $subject = "Activa tu cuenta, " . $user->name()->value();
-        $body = "Hola! Por favor activa tu cuenta haciendo clic en el siguiente enlace: " . $activationLink;
-
-        $this->sendEmailPort->send($user->email()->value(), $subject, $body);
+        
+        /* MODIFICACIÓN AQUÍ: 
+           Pasamos directamente el link como body. 
+           Nuestro PhpMailAdapter lo tomará y lo pondrá dentro del botón <a href="...">
+        */
+        $this->sendEmailPort->send(
+            $user->email()->value(), 
+            $subject, 
+            $activationLink
+        );
 
         return $user;
     }
-
-    
 }
