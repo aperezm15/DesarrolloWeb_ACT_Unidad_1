@@ -26,21 +26,27 @@ final class CreateUserService implements CreateUserUseCase
     {
         $email = new UserEmail($command->getEmail());
         $existingUser = $this->getUserByEmailPort->getByEmail($email);
+        
         if ($existingUser !== null) {
             throw UserAlreadyExistsException::becauseEmailAlreadyExists($email->value());
         }
-        $user = UserApplicationMapper::fromCreateCommandToModel($command);
-        return $this->saveUserPort->save($user);
 
+        $user = UserApplicationMapper::fromCreateCommandToModel($command);
+
+        // 1. Generamos el token
         $activationToken = bin2hex(random_bytes(32));
+
+        // 2. Guardamos usando el método del TOKEN (quitamos el return de arriba)
         $this->saveUserPort->saveWithToken($user, $activationToken);
 
-        $activationLink = "http://localhost/tu-proyecto/activate.php?token=" . $activationToken;
+        // 3. Preparamos y enviamos el correo
+        $activationLink = "http://localhost/tu-proyecto/public/index.php?route=activate&token=" . $activationToken;
         $subject = "Activa tu cuenta, " . $user->name()->value();
         $body = "Hola! Por favor activa tu cuenta haciendo clic en el siguiente enlace: " . $activationLink;
 
         $this->sendEmailPort->send($user->email()->value(), $subject, $body);
 
+        // 4. AHORA SÍ, retornamos al final
         return $user;
     }
 
