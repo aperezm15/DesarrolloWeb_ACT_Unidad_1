@@ -51,8 +51,10 @@ final class DependencyInjection
     public static function getCreateUserUseCase(): CreateUserUseCase
     {
         ClassLoader::loadClass('CreateUserService');
+        ClassLoader::loadClass('PhpMailAdapter');
         $repo = self::getUserRepository();
-        return new CreateUserService($repo, $repo);
+        $mailAdapter = new PhpMailAdapter();
+        return new CreateUserService($repo, $repo, $mailAdapter);
     }
 
     public static function getUpdateUserUseCase(): UpdateUserUseCase
