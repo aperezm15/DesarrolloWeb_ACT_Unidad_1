@@ -175,4 +175,22 @@ ORDER BY name ASC
             ':id' => $userId->value(),
         ));
     }
+
+    public function saveWithToken(UserModel $user, string $token): void
+    {
+        $sql = "INSERT INTO users (id, name, email, password, role, status, activation_token) 
+            VALUES (:id, :name, :email, :password, :role, :status, :token)";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->bindValue(':id', $user->id()->value());
+        $stmt->bindValue(':name', $user->name()->value());
+        $stmt->bindValue(':email', $user->email()->value());
+        $stmt->bindValue(':password', $user->password()->value());
+        $stmt->bindValue(':role', $user->role());
+        $stmt->bindValue(':status', $user->status());
+        $stmt->bindValue(':token', $token);
+
+        $stmt->execute();
+    }
 }
