@@ -68,6 +68,7 @@ final class ClassLoader
         'PHPMailer\\PHPMailer\\PHPMailer' => 'Libs/PHPMailer/PHPMailer.php',
         'PHPMailer\\PHPMailer\\SMTP' => 'Libs/PHPMailer/SMTP.php',
         'PHPMailer\\PHPMailer\\Exception' => 'Libs/PHPMailer/Exception.php',
+        'ResetPasswordService' => 'Application/Services/ResetPasswordService.php',
     );
     public static function register(): void
     {
