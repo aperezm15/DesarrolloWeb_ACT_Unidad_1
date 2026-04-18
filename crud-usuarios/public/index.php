@@ -29,11 +29,13 @@ DependencyInjection::boot();
 Flash::start();
 
 // ── Auth helpers ──────────────────────────────────────────────────────────────
-function isLoggedIn(): bool {
+function isLoggedIn(): bool
+{
     return isset($_SESSION['auth']['id']);
 }
 
-function getLoggedUser(): array {
+function getLoggedUser(): array
+{
     return is_array($_SESSION['auth'] ?? null) ? $_SESSION['auth'] : array();
 }
 
@@ -85,7 +87,11 @@ try {
                 View::redirect('users.create');
             }
             $request = new CreateUserWebRequest(
-                $form['id'], $form['name'], $form['email'], $form['password'], $form['role']
+                $form['id'],
+                $form['name'],
+                $form['email'],
+                $form['password'],
+                $form['role']
             );
             $controller->store($request);
             Flash::setSuccess('Usuario registrado. Revisa tu correo para activar la cuenta.');
@@ -114,8 +120,8 @@ try {
             $controller = DependencyInjection::getUserController();
             $id = $_GET['id'] ?? '';
             if (empty($id)) {
-        throw new Exception("El ID del usuario es necesario para ver el detalle.");
-    }
+                throw new Exception("El ID del usuario es necesario para ver el detalle.");
+            }
             $user = $controller->show($id);
             View::render('users/show', ['pageTitle' => 'Detalle', 'user' => $user, 'message' => Flash::message()]);
             break;
@@ -132,12 +138,18 @@ try {
             $form = getUpdateUserFormData();
             $errors = validateUpdateUserForm($form);
             if (!empty($errors)) {
-                Flash::setOld($form); Flash::setErrors($errors);
+                Flash::setOld($form);
+                Flash::setErrors($errors);
                 header('Location: ?route=users.edit&id=' . urlencode($form['id']));
                 exit;
             }
             $request = new UpdateUserWebRequest(
-                $form['id'], $form['name'], $form['email'], $form['password'], $form['role'], $form['status']
+                $form['id'],
+                $form['name'],
+                $form['email'],
+                $form['password'],
+                $form['role'],
+                $form['status']
             );
             $controller->update($request);
             Flash::setSuccess('Usuario actualizado.');
@@ -154,8 +166,11 @@ try {
         case 'login':
             if (isLoggedIn()) View::redirect('home');
             View::render('auth/login', [
-                'pageTitle' => 'Login', 'message' => Flash::message(), 
-                'errors' => Flash::errors(), 'old' => Flash::old(), 'success' => Flash::success()
+                'pageTitle' => 'Login',
+                'message' => Flash::message(),
+                'errors' => Flash::errors(),
+                'old' => Flash::old(),
+                'success' => Flash::success()
             ]);
             break;
 
@@ -165,8 +180,10 @@ try {
             $loginUseCase = DependencyInjection::getLoginUseCase();
             $user = $loginUseCase->execute(new LoginCommand($email, $password));
             $_SESSION['auth'] = [
-                'id' => $user->id()->value(), 'name' => $user->name()->value(),
-                'email' => $user->email()->value(), 'role' => $user->role()
+                'id' => $user->id()->value(),
+                'name' => $user->name()->value(),
+                'email' => $user->email()->value(),
+                'role' => $user->role()
             ];
             Flash::setSuccess('Bienvenido/a.');
             View::redirect('home');
@@ -179,8 +196,11 @@ try {
 
         case 'forgot':
             View::render('auth/forgot-password', [
-                'pageTitle' => 'Recuperar', 'message' => Flash::message(),
-                'success' => Flash::success(), 'errors' => Flash::errors(), 'old' => Flash::old()
+                'pageTitle' => 'Recuperar',
+                'message' => Flash::message(),
+                'success' => Flash::success(),
+                'errors' => Flash::errors(),
+                'old' => Flash::old()
             ]);
             break;
 
@@ -196,6 +216,23 @@ try {
             Flash::setSuccess('Si el correo existe, recibirás instrucciones.');
             View::redirect('auth.forgot');
             break;
+        case 'news_index':
+            $controller = DependencyInjection::getNewsController();
+            $news = $controller->index();
+            View::render('news/list', ['news' => $news]);
+            break;
+
+        case 'news_create':
+            View::render('news/create', ['pageTitle' => 'Nueva Noticia']);
+            break;
+
+        case 'news_store':
+            $controller = DependencyInjection::getNewsController();
+            // Aquí podrías validar antes
+            $controller->store($_POST);
+            Flash::setSuccess('Noticia creada correctamente.');
+            View::redirect('news.index');
+            break;
 
         default:
             throw new RuntimeException('Acción no soportada.');
@@ -203,45 +240,54 @@ try {
 } catch (Throwable $exception) {
     //Flash::setMessage($exception->getMessage());
     //View::redirect('home'); // Redirección genérica en caso de error
-    die("<h3>Error Detectado:</h3>" . 
+    die("<h3>Error Detectado:</h3>" .
         "<strong>Mensaje:</strong> " . $exception->getMessage() . "<br>" .
         "<strong>Archivo:</strong> " . $exception->getFile() . "<br>" .
         "<strong>Línea:</strong> " . $exception->getLine());
 }
 
 // ── View Builders & Helpers ───────────────────────────────────────────────────
-function buildListUsersViewData(array $users): array {
+function buildListUsersViewData(array $users): array
+{
     return ['pageTitle' => 'Lista de usuarios', 'users' => $users, 'message' => Flash::message(), 'success' => Flash::success()];
 }
-function buildHomeViewData(string $message = ''): array {
+function buildHomeViewData(string $message = ''): array
+{
     return ['pageTitle' => 'Menú principal', 'message' => $message, 'success' => Flash::success()];
 }
-function buildCreateUserViewData(): array {
+function buildCreateUserViewData(): array
+{
     return ['pageTitle' => 'Registrar usuario', 'roleOptions' => UserRoleEnum::values(), 'message' => Flash::message(), 'errors' => Flash::errors(), 'old' => Flash::old()];
 }
-function buildEditUserViewData(UserResponse $user): array {
+function buildEditUserViewData(UserResponse $user): array
+{
     return ['pageTitle' => 'Editar usuario', 'user' => $user, 'roleOptions' => UserRoleEnum::values(), 'statusOptions' => UserStatusEnum::values(), 'message' => Flash::message(), 'errors' => Flash::errors(), 'old' => Flash::old()];
 }
-function generateUuid4(): string {
+function generateUuid4(): string
+{
     $data = random_bytes(16);
     $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
     $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
     return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 }
-function getCreateUserFormData(): array {
+function getCreateUserFormData(): array
+{
     return ['name' => trim($_POST['name'] ?? ''), 'email' => trim($_POST['email'] ?? ''), 'password' => trim($_POST['password'] ?? ''), 'role' => trim($_POST['role'] ?? '')];
 }
-function getUpdateUserFormData(): array {
+function getUpdateUserFormData(): array
+{
     return ['id' => trim($_POST['id'] ?? ''), 'name' => trim($_POST['name'] ?? ''), 'email' => trim($_POST['email'] ?? ''), 'password' => $_POST['password'] ?? '', 'role' => trim($_POST['role'] ?? ''), 'status' => trim($_POST['status'] ?? '')];
 }
-function validateCreateUserForm(array $form): array {
+function validateCreateUserForm(array $form): array
+{
     $errors = [];
     if ($form['name'] === '') $errors['name'] = 'Nombre obligatorio.';
     if (!filter_var($form['email'], FILTER_VALIDATE_EMAIL)) $errors['email'] = 'Email inválido.';
     if (strlen($form['password']) < 8) $errors['password'] = 'Mínimo 8 caracteres.';
     return $errors;
 }
-function validateUpdateUserForm(array $form): array {
+function validateUpdateUserForm(array $form): array
+{
     $errors = [];
     if ($form['name'] === '') $errors['name'] = 'Nombre obligatorio.';
     return $errors;
