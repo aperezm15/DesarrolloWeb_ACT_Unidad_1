@@ -45,4 +45,12 @@ final class UserWebMapper
         $user->Status()
     );
 }
+
+public function fromModelsToResponses(array $users): array
+{
+    return array_map(
+        fn(UserModel $user) => $this->fromModelToResponse($user),
+        $users
+    );
+}
 }

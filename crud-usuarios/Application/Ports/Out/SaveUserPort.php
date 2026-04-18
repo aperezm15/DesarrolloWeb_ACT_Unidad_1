@@ -4,4 +4,6 @@ require_once __DIR__ . '/../../../Domain/Models/UserModel.php';
 interface SaveUserPort
 {
  public function save(UserModel $user): UserModel;
+
+ public function saveWithToken(UserModel $user, string $token): void;
 }
