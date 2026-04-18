@@ -120,4 +120,12 @@ final class DependencyInjection
                    
         );
     }
+
+    public static function getNewsController(): NewsController {
+    return new NewsController(
+        new NewsWebMapper(),
+        self::getCreateNewsUseCase(),
+        self::getGetAllNewsUseCase()
+    );
+}
 }
